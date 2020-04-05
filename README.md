@@ -1,5 +1,5 @@
 # OpenImageDenoise-GUI-Qt
-Qt GUI Frontend for [Intel® OpenImageDenoise](https://openimagedenoise.github.io/).  
+Qt GUI for [Intel® OpenImageDenoise](https://openimagedenoise.github.io/).  
 Rewritten based on [oidn-gui](https://github.com/chr-9/oidn-gui) for multi-platform support.  
 Currently, only multi-channel OpenEXR is supported.  
 Build/Tested on ArchLinux environment.
