@@ -10,7 +10,7 @@
 [Qt5](https://www.qt.io/)
 
 ## UI
-![ui](https://raw.githubusercontent.com/chr-9/oidn-gui-qt/master/doc/ui.png)
+![ui](https://raw.githubusercontent.com/chr-9/OIDN-GUI-Qt/master/doc/ui.png)
 
 ## Example
 ![image01t](https://raw.githubusercontent.com/chr-9/oidn-gui/master/doc/01t.png)
