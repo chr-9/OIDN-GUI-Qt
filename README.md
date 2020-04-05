@@ -22,4 +22,4 @@ Build/Tested on ArchLinux environment.
 ## Todo
 - Reading and writing Ini files
 - Merge output with existing channels
-- Support for multiple files
+- Support for multiple aov files
