@@ -1,13 +1,13 @@
 # OIDN-GUI-Qt
- QT GUI Frontend for [Intel® OpenImageDenoise](https://openimagedenoise.github.io/).
- Currently, only multi-channel OpenEXR is supported.
- Tested in ArchLinux environment.
+QT GUI Frontend for [Intel® OpenImageDenoise](https://openimagedenoise.github.io/).  
+Currently, only multi-channel OpenEXR is supported.  
+Tested in ArchLinux environment.  
 
 ## Dependency
-[OpenImageDenoise](https://github.com/OpenImageDenoise/oidn)
-[OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)
-[SequenceParser](https://github.com/mikrosimage/sequenceparser)
-[Qt5](https://www.qt.io/)
+- [OpenImageDenoise](https://github.com/OpenImageDenoise/oidn)
+- [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)
+- [SequenceParser](https://github.com/mikrosimage/sequenceparser)
+- [Qt5](https://www.qt.io/)
 
 ## UI
 ![ui](https://raw.githubusercontent.com/chr-9/OIDN-GUI-Qt/master/doc/ui.png)
