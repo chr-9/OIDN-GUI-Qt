@@ -7,7 +7,6 @@ Build/Tested on ArchLinux.
 ## Features
 - Read/Write multi-channel OpenEXR files
 - Batch processing
-- CLI Support
 
 ## Requirement
 - [OpenImageDenoise](https://github.com/OpenImageDenoise/oidn)
@@ -26,8 +25,9 @@ Build/Tested on ArchLinux.
 
 ## Todo
 - Release appimage
-- Read/write ini files
+- ~~Read/write ini files~~
 - Merge output with existing channels
+- CLI Support
 - (Support for multiple aov files)
 
 ## License
