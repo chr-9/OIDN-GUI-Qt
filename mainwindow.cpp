@@ -15,12 +15,22 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    //QSettings settings("oidn.ini", QSettings::IniFormat);
-    //settings.setIniCodec(QTextCodec::codecForName("UTF-8"));
-
     ui->pushButton_runDenoiser->setEnabled(false);
     ui->pushButton_stop->setVisible(false);
     ui->pushButton_stop->setEnabled(false);
+
+    QSettings settings(QCoreApplication::applicationDirPath()+"/settings.ini", QSettings::IniFormat);
+    settings.setIniCodec(QTextCodec::codecForName("UTF-8"));
+    settings.beginGroup("oidn");
+    ui->lineEdit_layernameAlbedo->setText(settings.value("layername_albedo", "albedo").toString());
+    ui->lineEdit_layernameNormal->setText(settings.value("layername_normal", "N").toString());
+    ui->lineEdit_channameR->setText(settings.value("channelname_R", "R").toString());
+    ui->lineEdit_channameG->setText(settings.value("channelname_G", "G").toString());
+    ui->lineEdit_channameB->setText(settings.value("channelname_B", "B").toString());
+    ui->spinBox_maxmem->setValue(settings.value("maxmem", 6000).toInt());
+    ui->checkBox_useaovs->setChecked(settings.value("useaovs", true).toBool());
+    ui->checkBox_hdr->setChecked(settings.value("hdr", true).toBool());
+    settings.endGroup();
 }
 
 MainWindow::~MainWindow()
@@ -29,15 +39,13 @@ MainWindow::~MainWindow()
 }
 
 
+///////////////////////////////
+/// OIDN Functions
+///
+
 QString path_input = "";
 QString path_output = "";
 Imf::Compression compression = Imf::PXR24_COMPRESSION;
-
-QString layername_albedo = "albedo";
-QString layername_normal = "N";
-bool useaovs = true;
-bool hdr = true;
-
 bool isSequence = false;
 int minFrame = 0;
 int maxFrame = 0;
@@ -50,11 +58,6 @@ bool seqRunning = false;
 sequenceParser::Sequence seqInput;
 std::string parentDir;
 
-
-///////////////////////////////
-/// OIDN Functions
-///
-
 Imf::FrameBuffer frameBufferEXR(const ImageBuffer& image)
 {
     Imf::FrameBuffer frameBuffer;
@@ -66,14 +69,14 @@ Imf::FrameBuffer frameBufferEXR(const ImageBuffer& image)
     return frameBuffer;
 }
 
-Imf::FrameBuffer frameBufferAOV(const ImageBuffer& image, const string& aovname)
+Imf::FrameBuffer frameBufferAOV(const ImageBuffer& image, const string& aovname, const string& chanR, const string& chanG, const string& chanB)
 {
     Imf::FrameBuffer frameBuffer;
     int bytePixelStride = image.getChannels()*sizeof(float);
     int byteRowStride = image.getWidth()*bytePixelStride;
-    frameBuffer.insert(aovname+".R", Imf::Slice(Imf::FLOAT, (char*)&image[0], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
-    frameBuffer.insert(aovname+".G", Imf::Slice(Imf::FLOAT, (char*)&image[1], bytePixelStride, byteRowStride));
-    frameBuffer.insert(aovname+".B", Imf::Slice(Imf::FLOAT, (char*)&image[2], bytePixelStride, byteRowStride));
+    frameBuffer.insert(aovname+"."+chanR, Imf::Slice(Imf::FLOAT, (char*)&image[0], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
+    frameBuffer.insert(aovname+"."+chanG, Imf::Slice(Imf::FLOAT, (char*)&image[1], bytePixelStride, byteRowStride));
+    frameBuffer.insert(aovname+"."+chanB, Imf::Slice(Imf::FLOAT, (char*)&image[2], bytePixelStride, byteRowStride));
     return frameBuffer;
 }
 
@@ -83,7 +86,7 @@ ImageBuffer loadEXR(const string& filename)
     if (!inputFile.header().channels().findChannel("R") ||
             !inputFile.header().channels().findChannel("G") ||
             !inputFile.header().channels().findChannel("B"))
-        throw invalid_argument("image must have 3 channels");
+        throw invalid_argument("Beauty image must have 3 channels");
     Imath::Box2i dataWindow = inputFile.header().dataWindow();
     ImageBuffer image(dataWindow.max.x-dataWindow.min.x+1, dataWindow.max.y-dataWindow.min.y+1, 3);
     inputFile.setFrameBuffer(frameBufferEXR(image));
@@ -91,16 +94,16 @@ ImageBuffer loadEXR(const string& filename)
     return image;
 }
 
-ImageBuffer loadAOV(const string& filename, const string& aovname)
+ImageBuffer loadAOV(const string& filename, const string& aovname, const string& chanR, const string& chanG, const string& chanB)
 {
     Imf::InputFile inputFile(filename.c_str());
-    if (!inputFile.header().channels().findChannel(aovname + ".R") ||
-            !inputFile.header().channels().findChannel(aovname + ".G") ||
-            !inputFile.header().channels().findChannel(aovname + ".B"))
-        throw invalid_argument("image must have 3 channels");
+    if (!inputFile.header().channels().findChannel(aovname + "."+chanR) ||
+            !inputFile.header().channels().findChannel(aovname + "."+chanG) ||
+            !inputFile.header().channels().findChannel(aovname + "."+chanB))
+        throw invalid_argument(aovname+" image must have 3 channels");
     Imath::Box2i dataWindow = inputFile.header().dataWindow();
     ImageBuffer image(dataWindow.max.x-dataWindow.min.x+1, dataWindow.max.y-dataWindow.min.y+1, 3);
-    inputFile.setFrameBuffer(frameBufferAOV(image, aovname));
+    inputFile.setFrameBuffer(frameBufferAOV(image, aovname, chanR, chanG, chanB));
     inputFile.readPixels(dataWindow.min.y, dataWindow.max.y);
     return image;
 }
@@ -124,13 +127,7 @@ void errorCallback(void* userPtr, oidn::Error error, const char* message)
     throw runtime_error(message);
 }
 
-bool progressCallback(void* userPtr, double n)
-{
-  int progress = int(n * 100.);
-  return true;
-}
-
-void denoise(string filename, string outputFilename, int maxmem)
+void denoise(string filename, string outputFilename, string layername_albedo, string layername_normal, string channelname_R, string channelname_G, string channelname_B, int maxMemoryMB, bool useaovs, bool hdr)
 {
     ImageBuffer color, albedo, normal;
     ImageBuffer ref;
@@ -150,11 +147,11 @@ void denoise(string filename, string outputFilename, int maxmem)
 
     if (useaovs)
     {
-        albedo = loadAOV(filename, layername_albedo.toStdString());
+        albedo = loadAOV(filename, layername_albedo, channelname_R, channelname_G, channelname_B);
         if (albedo.getChannels() != 3 || albedo.getSize() != color.getSize())
             throw runtime_error("invalid albedo image");
 
-        normal = loadAOV(filename, layername_normal.toStdString());
+        normal = loadAOV(filename, layername_normal, channelname_R, channelname_G, channelname_B);
         if (normal.getChannels() != 3 || normal.getSize() != color.getSize())
             throw runtime_error("invalid normal image");
     }
@@ -183,8 +180,12 @@ void denoise(string filename, string outputFilename, int maxmem)
         filter.setImage("normal", normal.getData(), oidn::Format::Float3, width, height);
     filter.setImage("output", output.getData(), oidn::Format::Float3, width, height);
     filter.set("hdr", hdr);
-    filter.set("srgb", false);
-    filter.set("maxMemoryMB", maxmem);
+    if(hdr){
+        filter.set("srgb", false);
+    }else{
+        filter.set("srgb", true);
+    }
+    filter.set("maxMemoryMB", maxMemoryMB);
     filter.commit();
 
     cout << "Execute denoiser" << endl;
@@ -265,6 +266,9 @@ void MainWindow::on_pushButton_addSequenceFiles_clicked()
 
     seqInput = item.getSequence();
 
+    //QMessageBox::information(this, tr(""), tr(seqInput.getPrefix().c_str()));
+    //QMessageBox::information(this, tr(""), tr(seqInput.getSuffix().c_str()));
+
     minFrame = seqInput.getFirstTime();
     maxFrame = seqInput.getLastTime();
     totalFrame = (maxFrame-minFrame)+1;
@@ -322,7 +326,17 @@ void MainWindow::on_pushButton_runDenoiser_clicked()
             ui->label_stats->setText("Processing " + QString::fromStdString(filename));
 
             path_output = QString::fromStdString(parentDir+"denoised/"+filename); path_output.replace(".exr", ".denoised.exr");
-            denoise(parentDir+filename, path_output.toStdString(), ui->spinBox_maxmem->value());
+
+            string layername_albedo = ui->lineEdit_layernameNormal->text().toStdString();
+            string layername_normal = ui->lineEdit_layernameNormal->text().toStdString();
+            string channelname_R = ui->lineEdit_channameR->text().toStdString();
+            string channelname_G = ui->lineEdit_channameG->text().toStdString();
+            string channelname_B = ui->lineEdit_channameB->text().toStdString();
+            int maxmemMB = ui->spinBox_maxmem->value();
+            bool useaovs = ui->checkBox_useaovs->isChecked();
+            bool hdr = ui->checkBox_hdr->isChecked();
+
+            denoise(parentDir+filename, path_output.toStdString(), layername_albedo, layername_normal, channelname_R, channelname_G, channelname_B, maxmemMB, useaovs, hdr);
 
             processedFrame++;
             ui->progressBar_total->setValue((processedFrame/float(totalFrame))*100);
@@ -349,7 +363,17 @@ void MainWindow::on_pushButton_runDenoiser_clicked()
         ui->pushButton_setArnoldAOV->setEnabled(false);
         ui->pushButton_setRedshiftAOV->setEnabled(false);
 
-        denoise(path_input.toStdString(), path_output.toStdString(), ui->spinBox_maxmem->value());
+        string layername_albedo = ui->lineEdit_layernameNormal->text().toStdString();
+        string layername_normal = ui->lineEdit_layernameNormal->text().toStdString();
+        string channelname_R = ui->lineEdit_channameR->text().toStdString();
+        string channelname_G = ui->lineEdit_channameG->text().toStdString();
+        string channelname_B = ui->lineEdit_channameB->text().toStdString();
+        int maxmemMB = ui->spinBox_maxmem->value();
+        bool useaovs = ui->checkBox_useaovs->isChecked();
+        bool hdr = ui->checkBox_hdr->isChecked();
+
+        denoise(path_input.toStdString(), path_output.toStdString(), layername_albedo, layername_normal, channelname_R, channelname_G, channelname_B, maxmemMB, useaovs, hdr);
+
         ui->progressBar_total->setValue(100);
 
         ui->pushButton_runDenoiser->setEnabled(true);
@@ -368,35 +392,33 @@ void MainWindow::on_pushButton_runDenoiser_clicked()
 
 void MainWindow::on_pushButton_setArnoldAOV_clicked()
 {
-    layername_albedo = "albedo";
-    layername_normal = "N";
-
-    ui->lineEdit_layernameAlbedo->setText(layername_albedo);
-    ui->lineEdit_layernameNormal->setText(layername_normal);
+    ui->lineEdit_layernameAlbedo->setText("albedo");
+    ui->lineEdit_layernameNormal->setText("N");
 }
 
 void MainWindow::on_pushButton_setRedshiftAOV_clicked()
 {
-    layername_albedo = "diffusefilter";
-    layername_normal = "n";
-
-    ui->lineEdit_layernameAlbedo->setText(layername_albedo);
-    ui->lineEdit_layernameNormal->setText(layername_normal);
-}
-
-void MainWindow::on_checkBox_useaovs_stateChanged(int arg1)
-{
-    useaovs = ui->checkBox_useaovs->checkState();
-}
-
-void MainWindow::on_checkBox_hdr_stateChanged(int arg1)
-{
-    hdr = ui->checkBox_hdr->checkState();
+    ui->lineEdit_layernameAlbedo->setText("diffusefilter");
+    ui->lineEdit_layernameNormal->setText("n");
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     stopProcessing = true;
+
+    QSettings settings(QCoreApplication::applicationDirPath()+"/settings.ini", QSettings::IniFormat);
+    settings.setIniCodec(QTextCodec::codecForName("UTF-8"));
+    settings.beginGroup("oidn");
+    settings.setValue("layername_albedo", ui->lineEdit_layernameAlbedo->text());
+    settings.setValue("layername_normal", ui->lineEdit_layernameNormal->text());
+    settings.setValue("channelname_R", ui->lineEdit_channameR->text());
+    settings.setValue("channelname_G", ui->lineEdit_channameG->text());
+    settings.setValue("channelname_B", ui->lineEdit_channameB->text());
+    settings.setValue("maxmem", ui->spinBox_maxmem->value());
+    settings.setValue("useaovs", ui->checkBox_useaovs->isChecked());
+    settings.setValue("hdr", ui->checkBox_hdr->isChecked());
+    settings.endGroup();
+    settings.sync();
 }
 
 void MainWindow::on_pushButton_stop_clicked()
@@ -427,4 +449,18 @@ void MainWindow::on_comboBox_compress_currentIndexChanged(int index)
     default:
         break;
     }
+}
+
+void MainWindow::on_pushButton_setChan_RGB_clicked()
+{
+    ui->lineEdit_channameR->setText("R");
+    ui->lineEdit_channameG->setText("G");
+    ui->lineEdit_channameB->setText("B");
+}
+
+void MainWindow::on_pushButton_setChan_redgreenblue_clicked()
+{
+    ui->lineEdit_channameR->setText("red");
+    ui->lineEdit_channameG->setText("green");
+    ui->lineEdit_channameB->setText("blue");
 }

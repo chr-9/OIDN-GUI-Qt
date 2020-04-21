@@ -40,11 +40,11 @@ private slots:
 
     void on_pushButton_setRedshiftAOV_clicked();
 
-    void on_checkBox_useaovs_stateChanged(int arg1);
-
-    void on_checkBox_hdr_stateChanged(int arg1);
-
     void on_comboBox_compress_currentIndexChanged(int index);
+
+    void on_pushButton_setChan_RGB_clicked();
+
+    void on_pushButton_setChan_redgreenblue_clicked();
 
 private:
     Ui::MainWindow *ui;

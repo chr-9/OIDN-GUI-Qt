@@ -57,13 +57,21 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-LIBS += \
-    -lboost_system\
-    -lboost_regex\
-    -lboost_filesystem\
-    -lboost_locale\
-    -lIlmImf\
-    -L/usr/local/lib -lOpenImageDenoise
+win32 {
+       INCLUDEPATH += C:/boost_1_72_0
+
+       LIBS += -LC:/boost_1_72_0/lib64-msvc-14.2
+}
+
+unix {
+       LIBS += \
+            -lboost_system\
+            -lboost_regex\
+            -lboost_filesystem\
+            -lboost_locale\
+            -lIlmImf\
+            -L/usr/local/lib -lOpenImageDenoise
+}
 
 CONFIG += staticLib
 

@@ -225,11 +225,16 @@
     <widget class="QPushButton" name="pushButton_setArnoldAOV">
      <property name="geometry">
       <rect>
-       <x>120</x>
+       <x>80</x>
        <y>110</y>
        <width>91</width>
        <height>20</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>7</pointsize>
+      </font>
      </property>
      <property name="text">
       <string>Arnold AOVs</string>
@@ -238,11 +243,16 @@
     <widget class="QPushButton" name="pushButton_setRedshiftAOV">
      <property name="geometry">
       <rect>
-       <x>220</x>
-       <y>110</y>
-       <width>101</width>
+       <x>80</x>
+       <y>130</y>
+       <width>91</width>
        <height>20</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>7</pointsize>
+      </font>
      </property>
      <property name="text">
       <string>Redshift AOVs</string>
@@ -253,12 +263,12 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>231</width>
+       <width>71</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>AOV name</string>
+      <string>[AOV]</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_9">
@@ -302,7 +312,7 @@
       <rect>
        <x>80</x>
        <y>80</y>
-       <width>251</width>
+       <width>91</width>
        <height>21</height>
       </rect>
      </property>
@@ -318,7 +328,7 @@
       <rect>
        <x>80</x>
        <y>50</y>
-       <width>251</width>
+       <width>91</width>
        <height>21</height>
       </rect>
      </property>
@@ -327,6 +337,144 @@
      </property>
      <property name="text">
       <string>albedo</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_channameR">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>20</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="text">
+      <string>R</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_11">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>20</y>
+       <width>31</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Ch.R</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_channameG">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>50</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="text">
+      <string>G</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_12">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>50</y>
+       <width>31</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Ch.G</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_13">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>80</y>
+       <width>31</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Ch.B</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_channameB">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>80</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="text">
+      <string>B</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_setChan_redgreenblue">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>130</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>7</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>red/green/blue</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_setChan_RGB">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>110</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>7</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>R/G/B</string>
      </property>
     </widget>
    </widget>
