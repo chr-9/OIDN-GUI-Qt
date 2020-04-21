@@ -2,17 +2,17 @@
 Qt GUI for [Intel® OpenImageDenoise](https://openimagedenoise.github.io/).  
 Rewritten based on [oidn-gui](https://github.com/chr-9/oidn-gui) for multi-platform support.  
 Currently, only multi-channel OpenEXR is supported.  
-Build/Tested on ArchLinux.
+Build/Tested on ArchLinux, Windows10.
 
 ## Features
 - Read/Write multi-channel OpenEXR files
 - Batch processing
 
 ## Requirement
-- [OpenImageDenoise](https://github.com/OpenImageDenoise/oidn)
-- [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)(IlmImf)
-- [SequenceParser](https://github.com/mikrosimage/sequenceparser)
 - [Qt5](https://www.qt.io/)
+- [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)(IlmImf)
+- [OpenImageDenoise](https://github.com/OpenImageDenoise/oidn)
+- [SequenceParser](https://github.com/mikrosimage/sequenceparser)
 
 ## UI
 ![ui](https://github.com/chr-9/OIDN-GUI-Qt/blob/master/doc/ui.png)
