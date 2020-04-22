@@ -12,7 +12,12 @@ Build/Tested on ArchLinux, Windows10.
 - [Qt5](https://www.qt.io/)
 - [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)(IlmImf)
 - [OpenImageDenoise](https://github.com/OpenImageDenoise/oidn)
-- [SequenceParser](https://github.com/mikrosimage/sequenceparser)
+- [Boost](https://www.boost.org/)
+- [SequenceParser](https://github.com/mikrosimage/sequenceparser)(Included in the repository)
+
+## Usage
+- If animation, Enable LockSamplingPattern or fixing NoiseSeed in render settings to suppress flickering
+- Enable Albedo, Normal AOV
 
 ## UI
 ![ui](https://github.com/chr-9/OIDN-GUI-Qt/blob/master/doc/ui.png)
@@ -25,9 +30,11 @@ Build/Tested on ArchLinux, Windows10.
 
 ## Todo
 - Release appimage
+- Separate UI and denoise processing threads
 - ~~Read/write ini files~~
 - Merge output with existing channels
 - CLI Support
+- Add Pause/Resume feature
 - (Support for multiple aov files)
 
 ## License
