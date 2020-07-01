@@ -16,8 +16,8 @@ Build/Tested on ArchLinux, Windows10.
 - [SequenceParser](https://github.com/mikrosimage/sequenceparser)(Included in the repository)
 
 ## Usage
-- If animation, Enable LockSamplingPattern or fixing NoiseSeed in render settings to suppress flickering
-- Enable Albedo, Normal AOV
+- Add Albedo, Normal AOV
+- If animation, Enable LockSamplingPattern or fixing NoiseSeed in renderer settings to suppress flickering
 
 ## UI
 ![ui](https://github.com/chr-9/OIDN-GUI-Qt/blob/master/doc/ui.png)
@@ -25,17 +25,16 @@ Build/Tested on ArchLinux, Windows10.
 ## Example
 ![image01t](https://raw.githubusercontent.com/chr-9/oidn-gui/master/doc/01t.png)
 ![image01t_denoised](https://raw.githubusercontent.com/chr-9/oidn-gui/master/doc/01t_denoised.png)
-<!-- ![image01](https://raw.githubusercontent.com/chr-9/oidn-gui/master/doc/01.png) -->
-<!-- ![image01_denoised](https://raw.githubusercontent.com/chr-9/oidn-gui/master/doc/01_denoised.png) -->
 
-## Todo
-- Release appimage
-- Separate UI and denoise processing threads
+## TODO
+- Release appimage / Windows executable
+- Separate UI and denoise threads
 - ~~Read/write ini files~~
 - Merge output with existing channels
-- CLI Support
-- Add Pause/Resume feature
+- Pause/Resume feature
 - (Support for multiple aov files)
+- (CLI Support)
+- Deep EXR Support
 
 ## License
  [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)  
