@@ -50,7 +50,7 @@ HEADERS += \
     sequenceParser/detector.i \
     sequenceParser/filesystem.hpp \
     sequenceParser/filesystem.i \
-    sequenceParser/system.hpp \
+    sequenceParser/system.hpp \r
     sequenceParser/utils.hpp
 
 
@@ -58,9 +58,23 @@ FORMS += \
     mainwindow.ui
 
 win32 {
-       INCLUDEPATH += C:/boost_1_72_0
+       INCLUDEPATH += C:/boost_1_82_0
+       INCLUDEPATH += C:/OpenEXR/include
+       INCLUDEPATH += C:/git/oidn-2.0.0.x64.windows/include
 
-       LIBS += -LC:/boost_1_72_0/lib64-msvc-14.2
+       LIBS += -LC:/boost_1_82_0/lib64-msvc-14.2
+       LIBS += -LC:/OpenEXR/lib
+       LIBS += -lC:/git/oidn-2.0.0.x64.windows/lib/OpenImageDenoise
+
+       #OpenEXR
+       LIBS += -lC:/OpenEXR/lib/Half-2_4
+       LIBS += -lC:/OpenEXR/lib/Iex-2_4
+       LIBS += -lC:/OpenEXR/lib/IexMath-2_4
+       LIBS += -lC:/OpenEXR/lib/IlmImf-2_4
+       LIBS += -lC:/OpenEXR/lib/IlmImfUtil-2_4
+       LIBS += -lC:/OpenEXR/lib/IlmThread-2_4
+       LIBS += -lC:/OpenEXR/lib/Imath-2_4
+
 }
 
 unix {

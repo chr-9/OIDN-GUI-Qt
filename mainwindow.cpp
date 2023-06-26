@@ -7,11 +7,15 @@
 
 #include <OpenImageDenoise/oidn.hpp>
 
+#include <OpenEXR/ImfHeader.h>
+#include <QtCore/QDebug>
+#include <QMessageBox>
+
+#include <iostream>
+
 using namespace std;
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -63,9 +67,10 @@ Imf::FrameBuffer frameBufferEXR(const ImageBuffer& image)
     Imf::FrameBuffer frameBuffer;
     int bytePixelStride = image.getChannels()*sizeof(float);
     int byteRowStride = image.getWidth()*bytePixelStride;
-    frameBuffer.insert("R", Imf::Slice(Imf::FLOAT, (char*)&image[0], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
-    frameBuffer.insert("G", Imf::Slice(Imf::FLOAT, (char*)&image[1], bytePixelStride, byteRowStride));
-    frameBuffer.insert("B", Imf::Slice(Imf::FLOAT, (char*)&image[2], bytePixelStride, byteRowStride));
+
+    frameBuffer.insert("R", Imf::Slice(Imf::FLOAT , (char*)&image[0], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
+    frameBuffer.insert("G", Imf::Slice(Imf::FLOAT , (char*)&image[1], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
+    frameBuffer.insert("B", Imf::Slice(Imf::FLOAT , (char*)&image[2], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
     return frameBuffer;
 }
 
@@ -75,43 +80,71 @@ Imf::FrameBuffer frameBufferAOV(const ImageBuffer& image, const string& aovname,
     int bytePixelStride = image.getChannels()*sizeof(float);
     int byteRowStride = image.getWidth()*bytePixelStride;
     frameBuffer.insert(aovname+"."+chanR, Imf::Slice(Imf::FLOAT, (char*)&image[0], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
-    frameBuffer.insert(aovname+"."+chanG, Imf::Slice(Imf::FLOAT, (char*)&image[1], bytePixelStride, byteRowStride));
-    frameBuffer.insert(aovname+"."+chanB, Imf::Slice(Imf::FLOAT, (char*)&image[2], bytePixelStride, byteRowStride));
+    frameBuffer.insert(aovname+"."+chanG, Imf::Slice(Imf::FLOAT, (char*)&image[1], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
+    frameBuffer.insert(aovname+"."+chanB, Imf::Slice(Imf::FLOAT, (char*)&image[2], bytePixelStride, byteRowStride, 1, 1, 0.0, false, false));
     return frameBuffer;
 }
 
 ImageBuffer loadEXR(const string& filename)
 {
     Imf::InputFile inputFile(filename.c_str());
+
     if (!inputFile.header().channels().findChannel("R") ||
             !inputFile.header().channels().findChannel("G") ||
             !inputFile.header().channels().findChannel("B"))
+    {
+        QMessageBox Msgbox;
+        Msgbox.setIcon(QMessageBox::Critical);
+        Msgbox.setText("Beauty image must have 3 channels");
+        Msgbox.exec();
         throw invalid_argument("Beauty image must have 3 channels");
+    }
+
     Imath::Box2i dataWindow = inputFile.header().dataWindow();
     ImageBuffer image(dataWindow.max.x-dataWindow.min.x+1, dataWindow.max.y-dataWindow.min.y+1, 3);
+
     inputFile.setFrameBuffer(frameBufferEXR(image));
     inputFile.readPixels(dataWindow.min.y, dataWindow.max.y);
+
     return image;
 }
 
 ImageBuffer loadAOV(const string& filename, const string& aovname, const string& chanR, const string& chanG, const string& chanB)
 {
+    qDebug() << "loadAOVs";
+
     Imf::InputFile inputFile(filename.c_str());
+
     if (!inputFile.header().channels().findChannel(aovname + "."+chanR) ||
             !inputFile.header().channels().findChannel(aovname + "."+chanG) ||
             !inputFile.header().channels().findChannel(aovname + "."+chanB))
+    {
+        QMessageBox Msgbox;
+        Msgbox.setIcon(QMessageBox::Critical);
+        Msgbox.setText(QString::fromStdString(aovname)+" image must have 3 channels");
+        Msgbox.exec();
         throw invalid_argument(aovname+" image must have 3 channels");
+    }
+
     Imath::Box2i dataWindow = inputFile.header().dataWindow();
+
     ImageBuffer image(dataWindow.max.x-dataWindow.min.x+1, dataWindow.max.y-dataWindow.min.y+1, 3);
+
     inputFile.setFrameBuffer(frameBufferAOV(image, aovname, chanR, chanG, chanB));
+
     inputFile.readPixels(dataWindow.min.y, dataWindow.max.y);
     return image;
 }
 
 void saveEXR(const string& filename, const ImageBuffer& image)
 {
-    if (image.getChannels() != 3)
+    if (image.getChannels() != 3){
+        QMessageBox Msgbox;
+        Msgbox.setIcon(QMessageBox::Critical);
+        Msgbox.setText("image must have 3 channels");
+        Msgbox.exec();
         throw invalid_argument("image must have 3 channels");
+    }
 
     Imf::Header header(image.getWidth(), image.getHeight(), 1, Imath::V2f(0, 0), image.getWidth(), Imf::INCREASING_Y, compression);
     header.channels().insert("R", Imf::Channel(Imf::FLOAT));
@@ -124,6 +157,10 @@ void saveEXR(const string& filename, const ImageBuffer& image)
 
 void errorCallback(void* userPtr, oidn::Error error, const char* message)
 {
+    QMessageBox Msgbox;
+    Msgbox.setIcon(QMessageBox::Critical);
+    Msgbox.setText(message);
+    Msgbox.exec();
     throw runtime_error(message);
 }
 
@@ -138,22 +175,41 @@ void denoise(string filename, string outputFilename, string layername_albedo, st
     set<string> layerNames;
     channels.layers(layerNames);
     for(string layerName : layerNames){
-        cout << "Layer: " << layerName << endl;
+        qDebug() << "Layer: " << layerName);
     }*/
+    qDebug() << "loadEXR";
 
     color = loadEXR(filename);
-    if (color.getChannels() != 3)
+    if (color.getChannels() != 3){
+        QMessageBox Msgbox;
+        Msgbox.setIcon(QMessageBox::Critical);
+        Msgbox.setText("invalid color image");
+        Msgbox.exec();
         throw runtime_error("invalid color image");
+    }
+
 
     if (useaovs)
     {
+        qDebug() << "loadAOVs";
+
         albedo = loadAOV(filename, layername_albedo, channelname_R, channelname_G, channelname_B);
-        if (albedo.getChannels() != 3 || albedo.getSize() != color.getSize())
+        if (albedo.getChannels() != 3 || albedo.getSize() != color.getSize()){
+            QMessageBox Msgbox;
+            Msgbox.setIcon(QMessageBox::Critical);
+            Msgbox.setText("invalid albedo image");
+            Msgbox.exec();
             throw runtime_error("invalid albedo image");
+        }
 
         normal = loadAOV(filename, layername_normal, channelname_R, channelname_G, channelname_B);
-        if (normal.getChannels() != 3 || normal.getSize() != color.getSize())
+        if (normal.getChannels() != 3 || normal.getSize() != color.getSize()){
+            QMessageBox Msgbox;
+            Msgbox.setIcon(QMessageBox::Critical);
+            Msgbox.setText("invalid normal image");
+            Msgbox.exec();
             throw runtime_error("invalid normal image");
+        }
     }
 
     int width  = color.getWidth();
@@ -161,11 +217,16 @@ void denoise(string filename, string outputFilename, string layername_albedo, st
 
     ImageBuffer output(width, height, 3);
 
-    cout << "Initializing" << endl;
+    qDebug() << "Initializing";
     oidn::DeviceRef device = oidn::newDevice();
-    const char* errorMessage;
-    if (device.getError(errorMessage) != oidn::Error::None)
+        const char* errorMessage;
+    if (device.getError(errorMessage) != oidn::Error::None){
+        QMessageBox Msgbox;
+        Msgbox.setIcon(QMessageBox::Critical);
+        Msgbox.setText(errorMessage);
+        Msgbox.exec();
         throw runtime_error(errorMessage);
+    }
     device.setErrorFunction(errorCallback);
     device.set("setAffinity", true);
     device.commit();
@@ -186,12 +247,14 @@ void denoise(string filename, string outputFilename, string layername_albedo, st
         filter.set("srgb", true);
     }
     filter.set("maxMemoryMB", maxMemoryMB);
+    filter.set("quality", OIDN_QUALITY_HIGH);
+    //filter.set("cleanAux", true);
     filter.commit();
 
-    cout << "Execute denoiser" << endl;
+    qDebug() << "Execute denoiser";
     filter.execute();
 
-    cout << "Saving output" << endl;
+    qDebug() << "Saving output";
     saveEXR(outputFilename, output);
 }
 
@@ -327,7 +390,7 @@ void MainWindow::on_pushButton_runDenoiser_clicked()
 
             path_output = QString::fromStdString(parentDir+"denoised/"+filename); path_output.replace(".exr", ".denoised.exr");
 
-            string layername_albedo = ui->lineEdit_layernameNormal->text().toStdString();
+            string layername_albedo = ui->lineEdit_layernameAlbedo->text().toStdString();
             string layername_normal = ui->lineEdit_layernameNormal->text().toStdString();
             string channelname_R = ui->lineEdit_channameR->text().toStdString();
             string channelname_G = ui->lineEdit_channameG->text().toStdString();
@@ -363,7 +426,7 @@ void MainWindow::on_pushButton_runDenoiser_clicked()
         ui->pushButton_setArnoldAOV->setEnabled(false);
         ui->pushButton_setRedshiftAOV->setEnabled(false);
 
-        string layername_albedo = ui->lineEdit_layernameNormal->text().toStdString();
+        string layername_albedo = ui->lineEdit_layernameAlbedo->text().toStdString();
         string layername_normal = ui->lineEdit_layernameNormal->text().toStdString();
         string channelname_R = ui->lineEdit_channameR->text().toStdString();
         string channelname_G = ui->lineEdit_channameG->text().toStdString();
@@ -394,12 +457,20 @@ void MainWindow::on_pushButton_setArnoldAOV_clicked()
 {
     ui->lineEdit_layernameAlbedo->setText("albedo");
     ui->lineEdit_layernameNormal->setText("N");
+
+    ui->lineEdit_channameR->setText("red");
+    ui->lineEdit_channameG->setText("green");
+    ui->lineEdit_channameB->setText("blue");
 }
 
 void MainWindow::on_pushButton_setRedshiftAOV_clicked()
 {
     ui->lineEdit_layernameAlbedo->setText("diffusefilter");
-    ui->lineEdit_layernameNormal->setText("n");
+    ui->lineEdit_layernameNormal->setText("N");
+
+    ui->lineEdit_channameR->setText("R");
+    ui->lineEdit_channameG->setText("G");
+    ui->lineEdit_channameB->setText("B");
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

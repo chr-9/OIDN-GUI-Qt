@@ -39,7 +39,10 @@
      <enum>QFrame::StyledPanel</enum>
     </property>
     <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>1</number>
     </property>
     <widget class="QSpinBox" name="spinBox_maxmem">
      <property name="geometry">
@@ -216,11 +219,17 @@
       <height>171</height>
      </rect>
     </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
     <property name="frameShape">
      <enum>QFrame::StyledPanel</enum>
     </property>
     <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>1</number>
     </property>
     <widget class="QPushButton" name="pushButton_setArnoldAOV">
      <property name="geometry">
@@ -352,7 +361,7 @@
       <string/>
      </property>
      <property name="text">
-      <string>R</string>
+      <string>red</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_11">
@@ -386,7 +395,7 @@
       <string/>
      </property>
      <property name="text">
-      <string>G</string>
+      <string>green</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_12">
@@ -438,7 +447,7 @@
       <string/>
      </property>
      <property name="text">
-      <string>B</string>
+      <string>blue</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_setChan_redgreenblue">
