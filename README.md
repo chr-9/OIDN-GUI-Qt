@@ -10,7 +10,7 @@ Build/Tested on ArchLinux, Windows10/11.
 
 ## Requirement
 - [Qt5](https://www.qt.io/)
-- [OpenEXR 2.5.5](https://github.com/AcademySoftwareFoundation/openexr)(IlmImf)　3.x not supported.
+- [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)(IlmImf) 3.x not supported.
 - [OpenImageDenoise](https://github.com/OpenImageDenoise/oidn)
 - [Boost](https://www.boost.org/)
 - [SequenceParser](https://github.com/mikrosimage/sequenceparser)(Included in this repository)
